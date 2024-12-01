@@ -1,0 +1,7 @@
+Docker ?
+- Como funciona arquitetura do docker para micro serviços como é feita a comunicação ?
+- Os Containers precisão ter variaveis de ambiente, não são como maquinas distintas ?
+
+
+
+
