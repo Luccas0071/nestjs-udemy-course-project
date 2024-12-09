@@ -7,11 +7,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { PessoasService } from './pessoas.service';
 import { CreatePessoaDto } from './dto/create-pessoa.dto';
 import { UpdatePessoaDto } from './dto/update-pessoa.dto';
+import { AuthTokenGuard } from 'src/auth/guards/auth-token.guards';
+import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
+import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 
+@UseGuards(AuthTokenGuard)
 @Controller('pessoas')
 export class PessoasController {
   constructor(private pessoasService: PessoasService) {}
@@ -36,14 +41,22 @@ export class PessoasController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRecadoDto: UpdatePessoaDto,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
   ) {
-    const recadoAux = this.pessoasService.update(id, updateRecadoDto);
+    const recadoAux = this.pessoasService.update(
+      id,
+      updateRecadoDto,
+      tokenPayload,
+    );
     return recadoAux;
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    this.pessoasService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    this.pessoasService.remove(id, tokenPayload);
     return { message: 'Excluido com sucesso!' };
   }
 }

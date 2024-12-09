@@ -7,25 +7,23 @@ import {
   Patch,
   Post,
   Query,
-  UseInterceptors,
 } from '@nestjs/common';
 import { RecadosService } from './recados.service';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { AddHeaderInterceptor } from 'src/common/interceptors/add-header.interceptor';
+import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
+import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 
 // DTO - Data Transfer Object -> Objeto de transformar dados
 // DTO - Objto simples -> validar dados / transformar dados
-
 @Controller('recados')
 export class RecadosController {
   constructor(private readonly recadosService: RecadosService) {}
 
   @Get()
-  @UseInterceptors(AddHeaderInterceptor)
   findAll(@Query() paginationDto: PaginationDto) {
-    //Query daddos passados pela url exe: ?teste=10&?teste01=teste
+    //Query dados passados pela url exe: ?teste=10&?teste01=teste
     return this.recadosService.findAll(paginationDto);
   }
 
@@ -35,21 +33,34 @@ export class RecadosController {
   }
 
   @Post()
-  create(@Body() createRecadoDto: CreateRecadoDto) {
-    const recadoAux = this.recadosService.create(createRecadoDto);
-
+  create(
+    @Body() createRecadoDto: CreateRecadoDto,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    const recadoAux = this.recadosService.create(createRecadoDto, tokenPayload);
     return recadoAux;
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateRecadoDto: UpdateRecadoDto) {
-    const recadoAux = this.recadosService.update(id, updateRecadoDto);
+  update(
+    @Param('id') id: number,
+    @Body() updateRecadoDto: UpdateRecadoDto,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    const recadoAux = this.recadosService.update(
+      id,
+      updateRecadoDto,
+      tokenPayload,
+    );
     return recadoAux;
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    this.recadosService.remove(id);
+  remove(
+    @Param('id') id: number,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    this.recadosService.remove(id, tokenPayload);
     return { message: 'Excluido com sucesso!' };
   }
 }

@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,12 +9,15 @@ import { Pessoa } from './entities/pessoa.entity';
 import { Repository } from 'typeorm';
 import { CreatePessoaDto } from './dto/create-pessoa.dto';
 import { UpdatePessoaDto } from './dto/update-pessoa.dto';
+import { HashingService } from 'src/auth/hashing/hashing.service';
+import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 
 @Injectable()
 export class PessoasService {
   constructor(
     @InjectRepository(Pessoa)
     private readonly pessoaRepository: Repository<Pessoa>,
+    private readonly hashingService: HashingService,
   ) {}
 
   async findAll() {
@@ -30,9 +34,12 @@ export class PessoasService {
 
   async create(createPessoaDto: CreatePessoaDto) {
     try {
+      const passwordHash = await this.hashingService.hash(
+        createPessoaDto.password,
+      );
       const pessoaData = {
         name: createPessoaDto.name,
-        passwordHash: createPessoaDto.password,
+        passwordHash: passwordHash,
         email: createPessoaDto.email,
       };
       const pessoa = this.pessoaRepository.create(pessoaData);
@@ -46,11 +53,22 @@ export class PessoasService {
     }
   }
 
-  async update(id: number, updatePessoaDto: UpdatePessoaDto) {
+  async update(
+    id: number,
+    updatePessoaDto: UpdatePessoaDto,
+    tokenPayload: TokenPayloadDto,
+  ) {
     const pessoaData = {
       name: updatePessoaDto.name,
-      passwordHash: updatePessoaDto.password,
     };
+
+    if (updatePessoaDto?.password) {
+      const passwordHash = await this.hashingService.hash(
+        updatePessoaDto.password,
+      );
+
+      pessoaData['passwordHash'] = passwordHash;
+    }
 
     const pessoa = await this.pessoaRepository.preload({
       id,
@@ -60,11 +78,20 @@ export class PessoasService {
       throw new NotFoundException('Pessoa nã oencontrada!');
     }
 
+    if (pessoa.id === tokenPayload.sub) {
+      throw new ForbiddenException('Voce não é essa pessoa');
+    }
+
     return this.pessoaRepository.save(pessoa);
   }
 
-  async remove(id: number) {
+  async remove(id: number, tokenPayload: TokenPayloadDto) {
     const pessoa = await this.pessoaRepository.findOneBy({ id });
+
+    if (pessoa.id === tokenPayload.sub) {
+      throw new ForbiddenException('Voce não é essa pessoa');
+    }
+
     if (!pessoa) {
       throw new NotFoundException('Pessoa nã oencontrada!');
     }

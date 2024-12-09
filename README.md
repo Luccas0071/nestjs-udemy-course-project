@@ -2,7 +2,7 @@
 
 npm run start:dev
 
-# Para validar daddos na Dto
+# Para validar dados na Dto
 
 npm i class-validator class-transformer
 
@@ -13,3 +13,30 @@ npm i @nestjs/mapped-types
 # Intalar TypeOrm
 
 npm i @nestjs/typeorm typeorm pg
+
+# Importar modulo de configuração Ex. arquivo .env
+
+npm i @nestjs/config
+
+# Conf para validar o .env
+
+npm i @hapi/joi
+npm i -D @types/hapi\_\_joi
+
+# executar eslintrc manualmente
+
+npm run lint
+
+[JWT]
+
+# Instalar Bcrypt
+
+npm i bcrypt
+
+# Intalar tipos do Bcrypt
+
+npm i -D @types/bcrypt
+
+# intalar jwt
+
+npm i @nestjs/jwt
