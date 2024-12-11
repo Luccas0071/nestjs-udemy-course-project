@@ -5,7 +5,9 @@ import { PessoasModule } from './pessoas/pessoas.module';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './app.config';
 import { AuthModule } from './auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 // import { typeOrmConfig } from './config/typeorm.config';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -42,6 +44,10 @@ import { AuthModule } from './auth/auth.module';
     //   },
     // }),
     // TypeOrmModule.forRoot(typeOrmConfig),
+    ServeStaticModule.forRoot({
+      rootPath: path.resolve(__dirname, '..', '..', 'pictures'),
+      serveRoot: '/pictures',
+    }),
     RecadosModel,
     PessoasModule,
     AuthModule,

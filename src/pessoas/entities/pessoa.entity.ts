@@ -1,4 +1,5 @@
 import { IsEmail } from 'class-validator';
+// import { RoutePolicies } from 'src/auth/enum/route-policies.enum';
 import { Recado } from 'src/recados/entities/recado.entity';
 import {
   Column,
@@ -39,4 +40,10 @@ export class Pessoa {
   //Esses recados são relacionados ao campo "para" na entidade recados
   @OneToMany(() => Recado, (recado) => recado.para)
   recadosRecebidos: Recado[];
+
+  @Column({ default: true })
+  active: boolean;
+
+  // @Column({ type: 'simple-array', default: [] })
+  // routePolicies: RoutePolicies[];
 }

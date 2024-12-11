@@ -7,16 +7,22 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  // UseGuards,
 } from '@nestjs/common';
 import { PessoasService } from './pessoas.service';
 import { CreatePessoaDto } from './dto/create-pessoa.dto';
 import { UpdatePessoaDto } from './dto/update-pessoa.dto';
-import { AuthTokenGuard } from 'src/auth/guards/auth-token.guards';
+// import { AuthTokenGuard } from 'src/auth/guards/auth-token.guards';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
 import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
-@UseGuards(AuthTokenGuard)
+import * as path from 'path';
+import * as fs from 'fs/promises';
+
+// @UseGuards(AuthTokenGuard)
 @Controller('pessoas')
 export class PessoasController {
   constructor(private pessoasService: PessoasService) {}
@@ -58,5 +64,26 @@ export class PessoasController {
   ) {
     this.pessoasService.remove(id, tokenPayload);
     return { message: 'Excluido com sucesso!' };
+  }
+
+  @Post('upload-picture')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPicture(
+    @UploadedFile() file: Express.Multer.File,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    const fileExtension = path
+      .extname(file.originalname)
+      .toLowerCase()
+      .substring(1);
+
+    const fileName = `${tokenPayload.sub}.${fileExtension}`;
+    const fileFullPath = path.resolve(process.cwd(), 'pictures', fileName);
+
+    await fs.writeFile(fileFullPath, file.buffer);
+
+    console.log(fileFullPath);
+    // return true;
+    return { fieldname: file.fieldname };
   }
 }

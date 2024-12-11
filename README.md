@@ -40,3 +40,13 @@ npm i -D @types/bcrypt
 # intalar jwt
 
 npm i @nestjs/jwt
+
+[ Upload de Arquivos ]
+
+# Biblioteca para upload de arquivo
+
+npm i -D @types/multer
+
+# Server para visualizar imagem
+
+npm install --save @nestjs/serve-static
